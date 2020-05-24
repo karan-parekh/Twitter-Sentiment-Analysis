@@ -6,6 +6,10 @@ def app_path():
     return os.getcwd().rsplit(os.sep, 1)[0]
 
 
+def data_path(filename: str='') -> str:
+    return os.path.join(app_path(), 'data', filename)
+
+
 def raw_data_path(filename=''):
     return os.path.join(app_path(), 'data', 'raw', filename)
 

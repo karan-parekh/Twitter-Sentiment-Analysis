@@ -3,7 +3,8 @@ import os
 
 def app_path():
     """Returns app root"""
-    return os.getcwd().rsplit(os.sep, 1)[0]
+    
+    return os.getcwd().rsplit(os.sep, 2)[0]
 
 
 def data_path(filename: str='') -> str:

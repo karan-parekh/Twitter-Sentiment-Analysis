@@ -26,9 +26,9 @@ stemmer = SnowballStemmer("english")
 
 def preprocess(text, stem=False):
     # Remove links, users and special characters
-    TEXT_CLEANING_RE = r"@\S+|https?:\S+|http?:\S|[^A-Za-z0-9]+"
+    TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z0-9]+"
 
-    text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip()
+    text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip().replace("rt", "")
     tokens = []
 
     for token in text.split():

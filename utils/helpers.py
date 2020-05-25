@@ -1,8 +1,14 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import re
 import seaborn as sns
+import nltk
 
+# nltk.download("stopwords")
+
+from nltk.corpus import stopwords
+from nltk.stem import SnowballStemmer
 from sklearn.model_selection import train_test_split, cross_val_predict, cross_val_score
 from sklearn.preprocessing import StandardScaler, OneHotEncoder, LabelEncoder
 from sklearn.metrics import roc_auc_score, roc_curve, f1_score, recall_score, mean_squared_error, r2_score
@@ -12,6 +18,30 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.svm import SVR
 from typing import Optional
 # from xgboost import XGBClassifier, XGBRegressor
+
+
+stop_words = stopwords.words("english")
+stemmer = SnowballStemmer("english")
+
+
+def preprocess(text, stem=False):
+    # Remove links, users and special characters
+    TEXT_CLEANING_RE = r"@\S+|https?:\S+|http?:\S|[^A-Za-z0-9]+"
+
+    text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip()
+    tokens = []
+
+    for token in text.split():
+
+        if token not in stop_words:
+
+            if stem:
+                tokens.append(stemmer.stem(token))
+
+            else:
+                tokens.append(token)
+
+    return " ".join(tokens)
 
 
 def get_categorical_df(df: pd.DataFrame) -> pd.DataFrame:
@@ -191,7 +221,7 @@ def run_classification_models(X, y, models: Optional[dict], test_size=0.3, rando
         y_pred = model.predict(X_test)
 
         area_under_curve     = roc_auc_score(y_test, y_pred)
-        fpr, tpr, thresholds = roc_curve(y_test, y_pred)
+        fpr, tpr, _ = roc_curve(y_test, y_pred)
 
         print('F1_Score     : ', f1_score(y_test, y_pred))
         print('Recall Score : ', recall_score(y_test, y_pred))
@@ -286,3 +316,7 @@ def generate_heatmap(df: pd.DataFrame):
 
 class RegressionException(Exception):
     """Raised when the regression methods encounters an Exception"""
+
+
+if __name__ == "__main__":
+    pass

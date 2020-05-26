@@ -19,14 +19,22 @@ from sklearn.svm import SVR
 from typing import Optional
 # from xgboost import XGBClassifier, XGBRegressor
 
+def get_hashtags(text, handle_space=True):
 
-stop_words = stopwords.words("english")
-stemmer = SnowballStemmer("english")
+    if handle_space:
+        space = r"#\s+"
+        text = re.sub(space, "#", str(text).lower()).strip()
+    
+    hash_tags = r"#\S+"
+    
+    return " ".join(re.findall(hash_tags, text))
 
 
 def preprocess(text, stem=False):
     # Remove links, users and special characters
     TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z0-9]+"
+    stop_words       = stopwords.words("english")
+    stemmer          = SnowballStemmer("english")
 
     text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip().replace("rt", "")
     tokens = []

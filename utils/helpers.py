@@ -6,7 +6,7 @@ import seaborn as sns
 import nltk
 
 # nltk.download("stopwords")
-
+from emot import EMOTICONS
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
 from sklearn.model_selection import train_test_split, cross_val_predict, cross_val_score
@@ -18,6 +18,15 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.svm import SVR
 from typing import Optional
 # from xgboost import XGBClassifier, XGBRegressor
+
+def convert_emoticons(text: str) -> str:
+    """Converts emoticons to words"""
+    
+    for emot in EMOTICONS:
+        text = re.sub(u'('+emot+')', " ".join(EMOTICONS[emot].replace(",","").split()), text)
+
+    return text
+
 
 def get_hashtags(text, handle_space=True):
 
@@ -32,11 +41,12 @@ def get_hashtags(text, handle_space=True):
 
 def preprocess(text, stem=False):
     # Remove links, users and special characters
-    TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z0-9]+"
+    TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z]+"
     stop_words       = stopwords.words("english")
     stemmer          = SnowballStemmer("english")
 
     text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip().replace("rt", "")
+    text = convert_emoticons(text)
     tokens = []
 
     for token in text.split():

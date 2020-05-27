@@ -1,11 +1,12 @@
 import matplotlib.pyplot as plt
+import nltk
 import numpy as np
 import pandas as pd
 import re
 import seaborn as sns
-import nltk
+import time
 
-# nltk.download("stopwords")
+from datetime import datetime
 from emot import EMOTICONS
 from nltk.corpus import stopwords
 from nltk.stem import SnowballStemmer
@@ -18,6 +19,26 @@ from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier,
 from sklearn.svm import SVR
 from typing import Optional
 # from xgboost import XGBClassifier, XGBRegressor
+
+from .paths import data_path
+
+
+def save_as_csv(df: pd.DataFrame, filename: str=''):
+    """Saves df to csv with unique filename"""
+    time.sleep(1)  # to avoid over-writing files generated within a second
+    
+    if not filename:
+        now = datetime.now()
+        timestamp = datetime.strftime(now, "%d%m-%M%S")
+        filename = "processed-{}.csv".format(timestamp)
+    
+    path = data_path(filename)
+    
+    print("Generating CSV at {}".format(path))
+    
+    df.to_csv(path)
+    print("Done")
+
 
 def convert_emoticons(text: str) -> str:
     """Converts emoticons to words"""
@@ -39,17 +60,17 @@ def get_hashtags(text, handle_space=True):
     return " ".join(re.findall(hash_tags, text))
 
 
-def preprocess(text, stem=False):
-    # Remove links, users and special characters
+def preprocess(tweet: str, stem: bool=False) -> str:
+    """Remove links, @mentions, numbers and special characters from tweet"""
     TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z]+"
     stop_words       = stopwords.words("english")
     stemmer          = SnowballStemmer("english")
 
-    text = re.sub(TEXT_CLEANING_RE, ' ', str(text).lower()).strip().replace("rt", "")
-    text = convert_emoticons(text)
+    tweet = re.sub(TEXT_CLEANING_RE, ' ', str(tweet).lower()).strip().replace("rt", "")
+    tweet = convert_emoticons(tweet)
     tokens = []
 
-    for token in text.split():
+    for token in tweet.split():
 
         if token not in stop_words:
 

@@ -29,7 +29,7 @@ def save_as_csv(df: pd.DataFrame, filename: str=''):
     
     if not filename:
         now = datetime.now()
-        timestamp = datetime.strftime(now, "%d%m-%M%S")
+        timestamp = datetime.strftime(now, "%d%m-%H%M%S")
         filename = "processed-{}.csv".format(timestamp)
     
     path = data_path(filename)

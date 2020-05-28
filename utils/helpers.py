@@ -6,6 +6,10 @@ import re
 import seaborn as sns
 import time
 
+from textblob import TextBlob
+
+from nltk.stem import WordNetLemmatizer
+from spellchecker import SpellChecker
 from datetime import datetime
 from emot import EMOTICONS
 from nltk.corpus import stopwords
@@ -21,6 +25,30 @@ from typing import Optional
 # from xgboost import XGBClassifier, XGBRegressor
 
 from .paths import data_path
+
+
+def get_subjectivity(text: str) -> str:
+    sentiment = TextBlob(text).sentiment
+    return sentiment.subjectivity
+
+def get_polarity(text: str) -> str:
+    sentiment = TextBlob(text).sentiment
+    return sentiment.polarity
+
+
+def spell_check(text: str, blacklist=None) -> str:
+    """Warning takes eternity to run"""
+
+    if not blacklist:
+        blacklist = []
+
+    checker = SpellChecker()
+    checker.word_frequency.load_words(blacklist)
+
+    words     = text.split()
+    corrected = [checker.correction(word) for word in words]
+
+    return " ".join(corrected)
 
 
 def save_as_csv(df: pd.DataFrame, filename: str=''):
@@ -53,28 +81,42 @@ def get_hashtags(text, handle_space=True):
 
     if handle_space:
         space = r"#\s+"
-        text = re.sub(space, "#", str(text).lower()).strip()
+        text  = re.sub(space, "#", str(text).lower()).strip()
     
     hash_tags = r"#\S+"
-    
-    return " ".join(re.findall(hash_tags, text))
+    tags      = [tag.replace("#", "") for tag in re.findall(hash_tags, text)]
+
+    return " ".join(tags)
 
 
-def preprocess(tweet: str, stem: bool=False) -> str:
+def preprocess(tweet: str, stem=False, lema=False) -> str:
     """Remove links, @mentions, numbers and special characters from tweet"""
+
     TEXT_CLEANING_RE = r"@mention|https?:\S+|http?:\S|[^A-Za-z]+"
     stop_words       = stopwords.words("english")
-    stemmer          = SnowballStemmer("english")
 
-    tweet = re.sub(TEXT_CLEANING_RE, ' ', str(tweet).lower()).strip().replace("rt", "")
-    tweet = convert_emoticons(tweet)
+    if stem:
+        stemmer = SnowballStemmer("english")
+
+    if lema:
+        lematizer = WordNetLemmatizer()
+
+    tweet  = re.sub(TEXT_CLEANING_RE, ' ', str(tweet).lower()).strip().replace("rt", "")
+    tweet  = convert_emoticons(tweet)
+
+    # print("Performing spell check")
+    # tweet  = spell_check(tweet)
+
     tokens = []
 
     for token in tweet.split():
 
         if token not in stop_words:
 
-            if stem:
+            if lema:
+                tokens.append(lematizer.lemmatize(token, pos='v'))
+
+            elif stem:
                 tokens.append(stemmer.stem(token))
 
             else:

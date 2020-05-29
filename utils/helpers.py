@@ -64,7 +64,7 @@ def save_as_csv(df: pd.DataFrame, filename: str=''):
     
     print("Generating CSV at {}".format(path))
     
-    df.to_csv(path, index=False)
+    df.to_csv(path, index=False, encoding='utf-8')
     print("Done")
 
 

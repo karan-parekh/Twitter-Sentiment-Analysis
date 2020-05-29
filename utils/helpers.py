@@ -84,7 +84,8 @@ def get_hashtags(text, handle_space=True):
         text  = re.sub(space, "#", str(text).lower()).strip()
     
     hash_tags = r"#\S+"
-    tags      = [tag.replace("#", "") for tag in re.findall(hash_tags, text)]
+    alpha     = r"[^A-Za-z]"
+    tags      = [re.sub(alpha, " ", tag).strip() for tag in re.findall(hash_tags, text)]
 
     return " ".join(tags)
 
